@@ -6,8 +6,8 @@
 /* ---------- Configuración (DATOS A CONFIRMAR con la empresa) ---------- */
 const CONFIG = {
   // Número de WhatsApp en formato internacional, sin "+" ni espacios.
-  whatsapp: '5493794000000',
-  email: 'ventas@regionalesdelnorte.com.ar',
+  whatsapp: '5493773450740',
+  email: 'administracion@regionalesdelnorte.com',
   // Año de inicio de la empresa: se usa para "Desde ..." y "+XX años".
   foundedYear: 1990,
 };

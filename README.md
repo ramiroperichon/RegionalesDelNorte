@@ -32,19 +32,25 @@ img/              Fotos de productos y favicon
 
 ## Datos a confirmar con la empresa
 
-Este boceto usa **datos de ejemplo** que hay que reemplazar antes de publicar:
+Ya están cargados los datos reales de contacto y ubicación:
+
+- **Teléfono y WhatsApp:** +54 3773 45-0740
+- **E-mail:** administracion@regionalesdelnorte.com
+- **Ubicación:** el mapa apunta a las coordenadas de la fábrica (−29.3822057, −58.1891751)
+
+Si alguno cambia: el WhatsApp y el e-mail se editan en `js/main.js` (`CONFIG.whatsapp`, en formato `549` + código de área + número sin espacios, y `CONFIG.email`); el teléfono y el correo que se ven en pantalla, en `index.html` (barra superior, contacto, pie y JSON-LD).
+
+Lo que sigue siendo **de ejemplo** y hay que reemplazar antes de publicar:
 
 | Dato | Dónde se cambia |
 |---|---|
-| Número de WhatsApp | `js/main.js` → `CONFIG.whatsapp` (formato `549` + código de área + número, sin espacios) |
-| Teléfono visible | `index.html` (barra superior, contacto, pie y JSON-LD): buscar `379 400-0000` y `+5493794000000` |
-| E-mail | `js/main.js` → `CONFIG.email` y en `index.html`: buscar `ventas@regionalesdelnorte.com.ar` |
 | Año de fundación | `js/main.js` → `CONFIG.foundedYear` (actualiza "Desde…" y "+XX años" en todo el sitio) |
 | Historia y línea de tiempo | `index.html`, sección `#nosotros` (texto y años 1998, 2008, 2015 son propuestas) |
 | Productos, descripciones y precios | `js/main.js` → `PRODUCTS`. Solo **Ciervo** y **Pavita** son productos reales con foto; Jabalí, Carpincho, Liebre y Codorniz son ejemplos |
 | Peso del frasco | `js/main.js` → `size` de cada producto (se tomó 375 g de la etiqueta) |
 | N.º de RNE y RNPA | `index.html`, pie de página |
 | Horario de atención | `index.html`, sección `#contacto` |
+| Dirección exacta (calle y número) | `index.html`: el mapa y la ficha usan las coordenadas de Google Maps; falta la dirección escrita |
 | Afirmaciones a validar | "Envíos a todo el país", "Planta habilitada", formas de pago, retiro en fábrica |
 
 ## Cómo agregar o cambiar un producto
