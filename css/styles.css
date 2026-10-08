@@ -1274,3 +1274,413 @@ body.is-locked { overflow: hidden; }
   .seal { right: -6px; top: -22px; width: 92px; }
   .wa-float { right: 14px; bottom: 14px; width: 52px; height: 52px; }
 }
+
+/* =========================================================
+   CAPA PREMIUM
+   Movimiento, profundidad y microinteracciones.
+   Todo se desactiva con "prefers-reduced-motion" (al final).
+   ========================================================= */
+
+:root {
+  --ease-out-expo: cubic-bezier(.16, 1, .3, 1);
+  --ease-out-quint: cubic-bezier(.22, 1, .36, 1);
+  --ease-spring: cubic-bezier(.34, 1.36, .54, 1);
+  --dur: .72s;
+  --dur-slow: 1.15s;
+}
+
+/* ---------- Barra de progreso de lectura ---------- */
+.scroll-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 90;
+  height: 2px;
+  pointer-events: none;
+}
+.scroll-progress span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-text), var(--gold) 55%, var(--gold-light));
+  transform: scaleX(var(--p, 0));
+  transform-origin: 0 50%;
+}
+
+/* ---------- Sistema de revelado ---------- */
+.js .reveal {
+  opacity: 0;
+  transform: translate3d(0, 26px, 0);
+  transition:
+    opacity var(--dur) var(--ease-out-quint),
+    transform var(--dur) var(--ease-out-quint);
+}
+.js .reveal.is-visible { opacity: 1; transform: none; }
+
+/* El contenedor escalonado aparece entero; sus hijos entran de a uno */
+.js .reveal--stagger { opacity: 1; transform: none; }
+.js .reveal--stagger > * {
+  opacity: 0;
+  transform: translate3d(0, 30px, 0);
+  transition:
+    opacity .8s var(--ease-out-quint),
+    transform .8s var(--ease-out-quint);
+  transition-delay: calc(var(--i, 0) * 85ms);
+}
+.js .reveal--stagger.is-visible > * { opacity: 1; transform: none; }
+
+/* El bloque visual del hero entra con una escala muy leve */
+.js .reveal--visual {
+  transform: translate3d(0, 34px, 0) scale(.965);
+  transition:
+    opacity var(--dur-slow) var(--ease-out-expo),
+    transform var(--dur-slow) var(--ease-out-expo);
+}
+.js .reveal--visual.is-visible { transform: none; }
+
+/* ---------- Títulos palabra por palabra ---------- */
+.word { display: inline-block; white-space: pre; }
+.js [data-split] .word {
+  opacity: 0;
+  transform: translate3d(0, .45em, 0);
+  filter: blur(7px);
+  transition:
+    opacity .85s var(--ease-out-expo),
+    transform .85s var(--ease-out-expo),
+    filter .85s var(--ease-out-expo);
+  transition-delay: calc(var(--i, 0) * 34ms);
+}
+.js [data-split].is-visible .word {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* ---------- Encabezado que se compacta al bajar ---------- */
+.header,
+.header__inner,
+.brand__mark {
+  transition:
+    min-height .4s var(--ease-out-quint),
+    width .4s var(--ease-out-quint),
+    height .4s var(--ease-out-quint),
+    box-shadow .4s ease,
+    background-color .4s ease;
+}
+.header.is-scrolled {
+  background: rgba(14, 13, 10, .97);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, .4);
+  border-bottom-color: rgba(196, 154, 90, .4);
+}
+.header.is-scrolled .header__inner { min-height: 62px; }
+.header.is-scrolled .brand__mark { width: 42px; height: 42px; }
+
+/* ---------- Hero ---------- */
+.hero__inner { position: relative; z-index: 1; }
+.hero__glow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .8s ease;
+  background: radial-gradient(
+    460px circle at var(--mx, 72%) var(--my, 42%),
+    rgba(196, 154, 90, .16),
+    transparent 68%);
+}
+.hero.is-lit .hero__glow { opacity: 1; }
+
+/* Los frascos flotan muy despacio, con fases distintas */
+@keyframes float-a {
+  0%, 100% { transform: translateX(6%) scale(1.04) translateY(0); }
+  50%      { transform: translateX(6%) scale(1.04) translateY(-9px); }
+}
+@keyframes float-b {
+  0%, 100% { transform: translateX(-6%) translateY(4%) scale(.94); }
+  50%      { transform: translateX(-6%) translateY(calc(4% - 7px)) scale(.94); }
+}
+.hero__jars img:first-child { animation: float-a 7s var(--ease-in-out-soft, ease-in-out) infinite; }
+.hero__jars img:last-child  { animation: float-b 8.4s ease-in-out infinite .9s; }
+
+/* El anillo del sello gira lentamente; "DESDE 1990" queda fijo */
+@keyframes seal-spin { to { transform: rotate(360deg); } }
+.seal__ring {
+  transform-box: view-box;
+  transform-origin: 80px 80px;
+  animation: seal-spin 48s linear infinite;
+}
+
+/* Parallax suave del conjunto (lo mueve el JS) */
+[data-parallax] {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.hero__visual.is-visible[data-parallax] {
+  transform: translate3d(var(--px, 0px), var(--py, 0px), 0);
+  transition: transform .6s var(--ease-out-quint);
+}
+.hero__visual.is-tracking[data-parallax] { transition: transform .25s ease-out; }
+
+/* Indicador de scroll */
+.scroll-cue {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 48px;
+  margin: clamp(20px, 3vw, 40px) auto 0;
+  opacity: .7;
+  transition: opacity .3s;
+}
+.scroll-cue:hover { opacity: 1; }
+.scroll-cue__line {
+  display: block;
+  width: 1px;
+  height: 36px;
+  background: linear-gradient(var(--gold), transparent);
+  transform-origin: 50% 0;
+  animation: cue 2.6s var(--ease-out-quint) infinite;
+}
+@keyframes cue {
+  0%        { transform: scaleY(0); opacity: 0; }
+  35%       { transform: scaleY(1); opacity: 1; }
+  70%, 100% { transform: scaleY(1) translateY(36px); opacity: 0; }
+}
+
+/* ---------- Botones con destello ---------- */
+.btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(110deg, transparent 22%, rgba(255, 255, 255, .5) 50%, transparent 78%);
+  transform: translateX(-130%);
+  transition: transform .9s var(--ease-out-expo);
+}
+.btn:hover::after { transform: translateX(130%); }
+.btn--forest::after,
+.btn--whatsapp::after,
+.btn--ghost-light::after {
+  background: linear-gradient(110deg, transparent 22%, rgba(224, 194, 138, .3) 50%, transparent 78%);
+}
+.btn--gold:hover { box-shadow: 0 10px 26px rgba(196, 154, 90, .35); }
+.btn--forest:hover { box-shadow: 0 10px 26px rgba(31, 61, 44, .3); }
+
+/* Botones que siguen levemente al cursor (lo mueve el JS) */
+[data-magnetic] {
+  transform: translate3d(var(--mgx, 0px), var(--mgy, 0px), 0);
+  transition: transform .45s var(--ease-out-quint), background-color .2s, box-shadow .3s;
+}
+[data-magnetic].is-tracking { transition: transform .15s ease-out, box-shadow .3s; }
+
+/* ---------- Tarjetas de producto ---------- */
+.products { perspective: 1400px; }
+.card {
+  transform-style: preserve-3d;
+  transition:
+    transform .55s var(--ease-out-quint),
+    box-shadow .55s var(--ease-out-quint),
+    border-color .4s ease;
+}
+.card:hover {
+  border-color: rgba(196, 154, 90, .55);
+  box-shadow:
+    0 2px 6px rgba(22, 20, 15, .08),
+    0 26px 54px rgba(22, 20, 15, .18);
+}
+.card.is-tilting {
+  transition: transform .12s linear, box-shadow .55s var(--ease-out-quint), border-color .4s ease;
+  transform:
+    perspective(1400px)
+    rotateX(var(--rx, 0deg))
+    rotateY(var(--ry, 0deg))
+    translate3d(0, -5px, 0);
+}
+/* Destello que cruza la foto al pasar el mouse */
+.card__media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 36%, rgba(224, 194, 138, .26) 50%, transparent 64%);
+  transform: translateX(-140%);
+  transition: transform 1s var(--ease-out-expo);
+}
+.card:hover .card__media::before { transform: translateX(140%); }
+.card:hover .card__price { color: var(--gold-text); }
+.card__price { transition: color .35s ease; }
+
+/* Filtrado con desvanecido */
+.card.is-leaving {
+  opacity: 0;
+  transform: scale(.96);
+  transition: opacity .22s ease, transform .22s ease;
+}
+.card.is-entering {
+  animation: card-in .6s var(--ease-out-quint) both;
+  animation-delay: calc(var(--i, 0) * 55ms);
+}
+@keyframes card-in {
+  from { opacity: 0; transform: translate3d(0, 22px, 0) scale(.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Fotos que entran con un fundido al cargar */
+.js .card__media img,
+.js .hero__jars img,
+.js .cart-item__thumb img {
+  opacity: 0;
+  transition: opacity .7s var(--ease-out-quint);
+}
+.js .card__media img.is-loaded,
+.js .hero__jars img.is-loaded,
+.js .cart-item__thumb img.is-loaded { opacity: 1; }
+
+/* ---------- Filtros ---------- */
+.chip { transition: background-color .25s, color .25s, border-color .25s, transform .25s var(--ease-spring); }
+.chip:hover { transform: translateY(-2px); }
+.chip.is-active { box-shadow: 0 8px 20px rgba(31, 61, 44, .22); }
+
+/* ---------- Línea de tiempo que se dibuja ---------- */
+.timeline::before { background: rgba(196, 154, 90, .2); }
+.timeline::after {
+  content: "";
+  position: absolute;
+  top: 48px;
+  left: 47px;
+  width: 1px;
+  height: calc((100% - 96px) * var(--progress, 0));
+  background: linear-gradient(var(--gold-light), var(--gold));
+  transition: height .25s linear;
+}
+.timeline li::before { transition: background-color .4s ease, box-shadow .4s ease; }
+.timeline li.is-passed::before {
+  background: var(--gold);
+  box-shadow: 0 0 0 4px rgba(196, 154, 90, .16);
+}
+
+/* ---------- Proceso y calidad ---------- */
+.step { transition: border-color .4s ease, background-color .4s ease, transform .5s var(--ease-out-quint); }
+.step:hover {
+  border-color: rgba(196, 154, 90, .6);
+  background: rgba(10, 20, 14, .45);
+  transform: translateY(-4px);
+}
+.step .icon { transition: transform .5s var(--ease-spring); }
+.step:hover .icon { transform: scale(1.12) rotate(-4deg); }
+
+.quality__card { transition: transform .5s var(--ease-out-quint), box-shadow .5s var(--ease-out-quint); }
+.quality__card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 44px rgba(22, 20, 15, .14);
+}
+.quality__card .icon { transition: transform .5s var(--ease-spring); }
+.quality__card:hover .icon { transform: scale(1.1); }
+
+/* ---------- Cómo comprar ---------- */
+.howto.is-visible .howto__num {
+  animation: pop .75s var(--ease-spring) both;
+  animation-delay: calc(var(--i, 0) * 85ms + .12s);
+}
+@keyframes pop {
+  from { transform: scale(.55); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+/* ---------- Preguntas frecuentes ---------- */
+.faq details { transition: background-color .3s ease; }
+.faq details[open] { background: rgba(196, 154, 90, .05); }
+.faq summary { transition: color .25s ease, padding-left .35s var(--ease-out-quint); }
+.faq summary:hover { color: var(--gold-text); padding-left: 10px; }
+.faq details[open] p { animation: faq-in .45s var(--ease-out-quint) both; }
+@keyframes faq-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- Panel del pedido ---------- */
+.drawer { transition: transform .55s var(--ease-out-expo), visibility 0s linear .55s; }
+.drawer.is-open { transition: transform .6s var(--ease-out-expo); }
+.drawer.is-open .cart-item {
+  animation: cart-in .5s var(--ease-out-quint) both;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+@keyframes cart-in {
+  from { opacity: 0; transform: translateX(26px); }
+  to   { opacity: 1; transform: none; }
+}
+.cart-btn { transition: background-color .25s, border-color .25s, transform .3s var(--ease-spring); }
+.cart-btn:hover { transform: translateY(-2px); }
+
+/* ---------- Enlaces del pie y navegación ---------- */
+.footer ul a,
+.contact__list a { transition: color .25s ease, transform .35s var(--ease-out-quint); }
+.footer ul a:hover { transform: translateX(4px); display: inline-block; }
+
+/* ---------- Mapa ---------- */
+.contact__map iframe { transition: filter .6s ease; }
+.contact__map:hover iframe { filter: grayscale(0) contrast(1); }
+
+/* ---------- WhatsApp flotante ---------- */
+.wa-float::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid var(--wa);
+  opacity: 0;
+  animation: ring 3.2s var(--ease-out-quint) infinite;
+}
+@keyframes ring {
+  0%       { transform: scale(.9); opacity: .7; }
+  70%,100% { transform: scale(1.45); opacity: 0; }
+}
+
+/* =========================================================
+   Accesibilidad: sin movimiento si el sistema lo pide
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal,
+  .js .reveal--stagger > *,
+  .js [data-split] .word,
+  .js .card__media img,
+  .js .hero__jars img,
+  .js .cart-item__thumb img {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+  .hero__jars img,
+  .seal__ring,
+  .scroll-cue__line,
+  .wa-float::before,
+  .howto.is-visible .howto__num,
+  .drawer.is-open .cart-item,
+  .card.is-entering,
+  .faq details[open] p {
+    animation: none !important;
+  }
+  .btn::after,
+  .card__media::before { display: none; }
+  .card.is-tilting { transform: none !important; }
+  [data-magnetic],
+  .hero__visual.is-visible[data-parallax] { transform: none !important; }
+  .scroll-cue { display: none; }
+}
+
+/* El correo es largo: que pueda cortarse en pantallas muy angostas */
+.contact__list strong,
+.contact__list a,
+.footer__contact a,
+.topbar a { overflow-wrap: anywhere; }
+
+/* El último punto de la trayectoria también espera su turno */
+.timeline li:last-child::before { background: var(--paper); }
+.timeline li:last-child.is-passed::before { background: var(--gold); }
+
+/* El indicador de scroll ya ocupa ese espacio: la franja sube un poco */
+.trust { margin-top: clamp(28px, 3.5vw, 52px); }

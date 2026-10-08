@@ -48,6 +48,9 @@
 <body>
   <a class="skip-link" href="#contenido">Saltar al contenido</a>
 
+  <!-- Barra de progreso de lectura -->
+  <div class="scroll-progress" aria-hidden="true"><span></span></div>
+
   <!-- ============ BARRA SUPERIOR ============ -->
   <div class="topbar">
     <div class="container topbar__inner">
@@ -110,22 +113,23 @@
 
     <!-- ============ HERO ============ -->
     <section class="hero" id="inicio">
+      <div class="hero__glow" aria-hidden="true"></div>
       <div class="container hero__inner">
         <div class="hero__copy">
           <p class="eyebrow eyebrow--light"><span>Desde <span data-founded>1990</span> · Mariano I. Loza, Corrientes</span></p>
-          <h1 class="hero__title">El sabor del monte correntino, <em>conservado con oficio.</em></h1>
+          <h1 class="hero__title" data-split>El sabor del monte correntino, <em>conservado con oficio.</em></h1>
           <p class="hero__lead">
             Somos una fábrica familiar de escabeches de carnes silvestres y de criadero propio.
             Elaboramos cada frasco con recetas tradicionales, materia prima de origen controlado
             y el mismo cuidado de siempre.
           </p>
           <div class="hero__ctas">
-            <a class="btn btn--gold" href="#productos">Ver productos y precios</a>
+            <a class="btn btn--gold" href="#productos" data-magnetic>Ver productos y precios</a>
             <a class="btn btn--ghost-light" href="#nosotros">Conocé nuestra historia</a>
           </div>
         </div>
 
-        <div class="hero__visual">
+        <div class="hero__visual reveal reveal--visual" data-parallax>
           <div class="frame">
             <div class="frame__inner hero__jars">
               <img src="img/ciervo.jpg" alt="Frasco de Ciervo deshuesado en escabeche, Regionales del Norte" width="468" height="468">
@@ -148,8 +152,12 @@
         </div>
       </div>
 
+      <a class="scroll-cue" href="#nosotros" aria-label="Ir a nuestra historia">
+        <span class="scroll-cue__line" aria-hidden="true"></span>
+      </a>
+
       <div class="container">
-        <ul class="trust">
+        <ul class="trust reveal reveal--stagger">
           <li class="trust__item">
             <svg class="icon icon--lg" aria-hidden="true"><use href="#i-award"/></svg>
             <div><strong>+<span data-years>35</span> años</strong><span>de trayectoria en el mercado</span></div>
@@ -174,9 +182,9 @@
     <!-- TEXTO DE PROPUESTA: validar historia y fechas con la empresa -->
     <section class="section section--paper" id="nosotros">
       <div class="container about">
-        <div class="about__story reveal">
+        <div class="about__story reveal reveal--stagger">
           <p class="eyebrow">Nuestra historia</p>
-          <h2 class="section__title">Una tradición familiar nacida en el interior de Corrientes</h2>
+          <h2 class="section__title" data-split>Una tradición familiar nacida en el interior de Corrientes</h2>
           <p class="dropcap">
             Regionales del Norte nació en Mariano I. Loza, un pueblo del interior correntino donde
             el monte, los esteros y la cocina de campo forman parte de la vida diaria. Lo que comenzó
@@ -242,11 +250,11 @@
       <div class="container">
         <header class="section__head section__head--center reveal">
           <p class="eyebrow eyebrow--light">Cómo trabajamos</p>
-          <h2 class="section__title">Del monte a tu mesa</h2>
+          <h2 class="section__title" data-split>Del monte a tu mesa</h2>
           <p class="section__lead">Un proceso simple y cuidado, igual que hace más de <span data-years>35</span> años.</p>
         </header>
 
-        <ol class="steps reveal">
+        <ol class="steps reveal reveal--stagger">
           <li class="step">
             <svg class="icon icon--xl" aria-hidden="true"><use href="#i-leaf"/></svg>
             <h3>Origen</h3>
@@ -277,7 +285,7 @@
         <header class="section__head products__head reveal">
           <div>
             <p class="eyebrow">Nuestros productos</p>
-            <h2 class="section__title">Escabeches deshuesados, listos para disfrutar</h2>
+            <h2 class="section__title" data-split>Escabeches deshuesados, listos para disfrutar</h2>
           </div>
           <div class="filters" role="group" aria-label="Filtrar productos">
             <button type="button" class="chip is-active" data-filter="todos" aria-pressed="true">Todos</button>
@@ -286,7 +294,7 @@
           </div>
         </header>
 
-        <div class="products" id="product-grid" aria-live="polite">
+        <div class="products reveal reveal--stagger" id="product-grid" aria-live="polite">
           <!-- Las tarjetas se generan desde js/main.js (array PRODUCTS) -->
         </div>
         <noscript>
@@ -327,11 +335,11 @@
       <div class="container">
         <header class="section__head section__head--center reveal">
           <p class="eyebrow">Calidad y confianza</p>
-          <h2 class="section__title">Calidad que se puede comprobar</h2>
+          <h2 class="section__title" data-split>Calidad que se puede comprobar</h2>
           <p class="section__lead">Trabajamos con las habilitaciones correspondientes y con materia prima de origen conocido.</p>
         </header>
 
-        <ul class="quality reveal">
+        <ul class="quality reveal reveal--stagger">
           <li class="quality__card">
             <svg class="icon icon--xl" aria-hidden="true"><use href="#i-factory"/></svg>
             <h3>Establecimiento habilitado</h3>
@@ -361,10 +369,10 @@
       <div class="container">
         <header class="section__head section__head--center reveal">
           <p class="eyebrow">Comprá fácil</p>
-          <h2 class="section__title">Cómo hacer tu pedido</h2>
+          <h2 class="section__title" data-split>Cómo hacer tu pedido</h2>
         </header>
 
-        <ol class="howto reveal">
+        <ol class="howto reveal reveal--stagger">
           <li>
             <span class="howto__num">1</span>
             <h3>Elegí tus productos</h3>
@@ -387,7 +395,7 @@
         </div>
 
         <!-- Preguntas frecuentes -->
-        <div class="faq reveal">
+        <div class="faq reveal reveal--stagger">
           <h3 class="faq__title">Preguntas frecuentes</h3>
           <details>
             <summary>¿Hacen envíos a todo el país?</summary>
@@ -418,10 +426,10 @@
       <div class="container contact">
         <div class="contact__info reveal">
           <p class="eyebrow eyebrow--light">Contacto</p>
-          <h2 class="section__title">Hablemos</h2>
+          <h2 class="section__title" data-split>Hablemos</h2>
           <p class="section__lead">Respondemos consultas, pedidos y propuestas comerciales. También podés visitarnos en la fábrica.</p>
 
-          <ul class="contact__list">
+          <ul class="contact__list reveal reveal--stagger">
             <li>
               <svg class="icon icon--lg" aria-hidden="true"><use href="#i-pin"/></svg>
               <div><span>Fábrica</span><strong>Mariano I. Loza, Corrientes, Argentina</strong></div>
@@ -538,7 +546,7 @@
   </footer>
 
   <!-- ============ BOTÓN WHATSAPP FLOTANTE ============ -->
-  <a class="wa-float" data-whatsapp="Hola, quisiera hacer una consulta sobre sus productos." href="#contacto" aria-label="Escribinos por WhatsApp">
+  <a class="wa-float" data-magnetic data-whatsapp="Hola, quisiera hacer una consulta sobre sus productos." href="#contacto" aria-label="Escribinos por WhatsApp">
     <svg class="icon" aria-hidden="true"><use href="#i-whatsapp"/></svg>
   </a>
 

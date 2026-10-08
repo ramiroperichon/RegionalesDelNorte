@@ -195,6 +195,9 @@ function renderProducts() {
       </div>
     </article>`).join('');
 
+  [...grid.children].forEach((card, i) => card.style.setProperty('--i', i));
+  fadeInImages(grid);
+
   grid.addEventListener('click', (e) => {
     const card = e.target.closest('.card');
     if (!card) return;
@@ -226,9 +229,7 @@ function setupFilters() {
         c.classList.toggle('is-active', active);
         c.setAttribute('aria-pressed', String(active));
       });
-      $$('#product-grid .card').forEach((card) => {
-        card.hidden = f !== 'todos' && card.dataset.category !== f;
-      });
+      filterCards(f);
     });
   });
 }
@@ -315,6 +316,9 @@ function renderCart() {
         </div>
       </li>`;
   }).join('');
+
+  [...list.children].forEach((li, i) => li.style.setProperty('--i', i));
+  fadeInImages(list);
 }
 
 function setupCartList() {
@@ -507,7 +511,11 @@ function setupNav() {
 
 /* ---------- Animaciones de entrada ---------- */
 function setupReveal() {
-  const items = $$('.reveal');
+  // Numera a los hijos para el escalonado y parte los títulos en palabras
+  $$('.reveal--stagger').forEach((el) => indexChildren(el));
+  $$('[data-split]').forEach((el) => splitWords(el));
+
+  const items = $$('.reveal, [data-split]');
   if (!('IntersectionObserver' in window)) {
     items.forEach((el) => el.classList.add('is-visible'));
     return;
@@ -521,6 +529,226 @@ function setupReveal() {
     });
   }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
   items.forEach((el) => io.observe(el));
+}
+
+/* Asigna --i a cada hijo directo, para retrasar su entrada */
+function indexChildren(el) {
+  [...el.children].forEach((child, i) => child.style.setProperty('--i', i));
+}
+
+/* Envuelve cada palabra en un <span> conservando el marcado interno */
+function splitWords(root) {
+  if (root.dataset.splitDone) return;
+  let i = 0;
+  const walk = (node) => {
+    [...node.childNodes].forEach((child) => {
+      if (child.nodeType === 3) {
+        const text = child.nodeValue;
+        if (!text.trim()) return;
+        const frag = document.createDocumentFragment();
+        text.split(/(\s+)/).forEach((part) => {
+          if (!part) return;
+          if (!part.trim()) { frag.appendChild(document.createTextNode(part)); return; }
+          const span = document.createElement('span');
+          span.className = 'word';
+          span.style.setProperty('--i', i++);
+          span.textContent = part;
+          frag.appendChild(span);
+        });
+        child.replaceWith(frag);
+      } else if (child.nodeType === 1) {
+        walk(child);
+      }
+    });
+  };
+  walk(root);
+  root.dataset.splitDone = '1';
+}
+
+/* =========================================================
+   Movimiento: scroll, parallax, inclinación de tarjetas
+   Todo comprueba "prefers-reduced-motion" antes de activarse.
+   ========================================================= */
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
+const motionOK = () => !reduceMotion.matches;
+
+/* Barra de progreso + encabezado compacto, en un solo cálculo por cuadro */
+function setupScrollEffects() {
+  const bar = $('.scroll-progress span');
+  const header = $('.header');
+  const timeline = $('.timeline');
+  let ticking = false;
+
+  const update = () => {
+    ticking = false;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const y = window.scrollY;
+    if (bar) bar.style.setProperty('--p', max > 0 ? Math.min(1, y / max) : 0);
+    if (header) header.classList.toggle('is-scrolled', y > 24);
+    if (timeline) updateTimeline(timeline);
+  };
+
+  const onScroll = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  };
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  update();
+}
+
+/* La línea de la trayectoria se dibuja a medida que se baja */
+function updateTimeline(el) {
+  const rect = el.getBoundingClientRect();
+  const start = window.innerHeight * 0.85;
+  const span = rect.height + start - window.innerHeight * 0.25;
+  const progress = Math.max(0, Math.min(1, (start - rect.top) / span));
+  el.style.setProperty('--progress', progress.toFixed(3));
+
+  const items = [...el.children];
+  items.forEach((li, i) => {
+    li.classList.toggle('is-passed', progress >= (i + 0.5) / items.length);
+  });
+}
+
+/* Brillo que sigue al cursor y parallax del conjunto de frascos */
+function setupHeroMotion() {
+  const hero = $('.hero');
+  const visual = $('[data-parallax]');
+  if (!hero || !finePointer.matches) return;
+
+  hero.addEventListener('pointerenter', () => hero.classList.add('is-lit'));
+  hero.addEventListener('pointerleave', () => {
+    hero.classList.remove('is-lit');
+    if (!visual) return;
+    visual.classList.remove('is-tracking');
+    visual.style.setProperty('--px', '0px');
+    visual.style.setProperty('--py', '0px');
+  });
+
+  hero.addEventListener('pointermove', (e) => {
+    const r = hero.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width;
+    const y = (e.clientY - r.top) / r.height;
+    hero.style.setProperty('--mx', `${(x * 100).toFixed(1)}%`);
+    hero.style.setProperty('--my', `${(y * 100).toFixed(1)}%`);
+    if (!visual || !motionOK()) return;
+    visual.classList.add('is-tracking');
+    visual.style.setProperty('--px', `${((x - 0.5) * -18).toFixed(1)}px`);
+    visual.style.setProperty('--py', `${((y - 0.5) * -14).toFixed(1)}px`);
+  });
+}
+
+/* Inclinación 3D de las tarjetas de producto */
+function setupCardTilt() {
+  const grid = $('#product-grid');
+  if (!grid || !finePointer.matches) return;
+
+  grid.addEventListener('pointermove', (e) => {
+    const card = e.target.closest('.card');
+    if (!card || !motionOK()) return;
+    const r = card.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    card.classList.add('is-tilting');
+    card.style.setProperty('--ry', `${(x * 7).toFixed(2)}deg`);
+    card.style.setProperty('--rx', `${(y * -7).toFixed(2)}deg`);
+  });
+
+  const reset = (e) => {
+    const card = e.target.closest('.card');
+    if (!card) return;
+    card.classList.remove('is-tilting');
+    card.style.removeProperty('--rx');
+    card.style.removeProperty('--ry');
+  };
+  grid.addEventListener('pointerleave', reset, true);
+  grid.addEventListener('pointerout', (e) => {
+    if (e.relatedTarget && e.target.closest('.card') === e.relatedTarget.closest?.('.card')) return;
+    reset(e);
+  });
+}
+
+/* Botones que se acercan levemente al cursor */
+function setupMagnetic() {
+  if (!finePointer.matches) return;
+  $$('[data-magnetic]').forEach((el) => {
+    el.addEventListener('pointermove', (e) => {
+      if (!motionOK()) return;
+      const r = el.getBoundingClientRect();
+      el.classList.add('is-tracking');
+      el.style.setProperty('--mgx', `${((e.clientX - r.left) / r.width - 0.5) * 12}px`);
+      el.style.setProperty('--mgy', `${((e.clientY - r.top) / r.height - 0.5) * 10}px`);
+    });
+    el.addEventListener('pointerleave', () => {
+      el.classList.remove('is-tracking');
+      el.style.setProperty('--mgx', '0px');
+      el.style.setProperty('--mgy', '0px');
+    });
+  });
+}
+
+/* Los años de trayectoria cuentan hacia arriba al entrar en pantalla */
+function setupCountUp() {
+  const targets = $$('[data-years]');
+  if (!targets.length || !('IntersectionObserver' in window)) return;
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      io.unobserve(entry.target);
+      const end = Number(entry.target.textContent);
+      if (!Number.isFinite(end) || !motionOK()) return;
+      const start = performance.now();
+      const step = (now) => {
+        const t = Math.min(1, (now - start) / 1100);
+        const eased = 1 - Math.pow(1 - t, 3);
+        entry.target.textContent = Math.round(end * eased);
+        if (t < 1) requestAnimationFrame(step);
+      };
+      entry.target.textContent = 0;
+      requestAnimationFrame(step);
+    });
+  }, { threshold: 1 });
+  targets.forEach((el) => io.observe(el));
+}
+
+/* Las fotos entran con un fundido cuando terminan de cargar */
+function fadeInImages(root = document) {
+  $$('img', root).forEach((img) => {
+    if (img.complete && img.naturalWidth) { img.classList.add('is-loaded'); return; }
+    img.addEventListener('load', () => img.classList.add('is-loaded'), { once: true });
+    img.addEventListener('error', () => img.classList.add('is-loaded'), { once: true });
+  });
+}
+
+/* Filtra el catálogo con una transición en lugar de un salto */
+function filterCards(f) {
+  const cards = $$('#product-grid .card');
+  const show = (card) => f === 'todos' || card.dataset.category === f;
+
+  if (!motionOK()) {
+    cards.forEach((card) => { card.hidden = !show(card); });
+    return;
+  }
+
+  cards.forEach((card) => { if (!card.hidden) card.classList.add('is-leaving'); });
+
+  setTimeout(() => {
+    let i = 0;
+    cards.forEach((card) => {
+      card.classList.remove('is-leaving', 'is-entering');
+      card.hidden = !show(card);
+      if (card.hidden) return;
+      card.style.setProperty('--i', i++);
+      // Reinicia la animación de entrada
+      void card.offsetWidth;
+      card.classList.add('is-entering');
+    });
+  }, 220);
 }
 
 /* ---------- Aviso breve ---------- */
@@ -547,4 +775,10 @@ document.addEventListener('DOMContentLoaded', () => {
   setupWhatsappLinks();
   setupNav();
   setupReveal();
+  setupScrollEffects();
+  setupHeroMotion();
+  setupCardTilt();
+  setupMagnetic();
+  setupCountUp();
+  fadeInImages();
 });
